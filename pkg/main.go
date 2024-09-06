@@ -8,16 +8,25 @@ import (
 )
 
 type ResourceStack struct {
-	Input  *awsdynamodb.AwsDynamodbStackInput
-	Labels map[string]string
+	StackInput *awsdynamodb.AwsDynamodbStackInput
+	Labels     map[string]string
 }
 
 func (s *ResourceStack) Resources(ctx *pulumi.Context) error {
+	locals := initializeLocals(ctx, s.StackInput)
 	//create aws provider using the credentials from the input
-	_, err := pulumiawsprovider.GetNative(ctx, s.Input.AwsCredential)
+	awsProvider, err := pulumiawsprovider.GetNative(ctx, s.StackInput.AwsCredential)
 	if err != nil {
 		return errors.Wrap(err, "failed to create aws provider")
 	}
 
+	createdDynamodbTable, err := table(ctx, locals, awsProvider)
+	if err != nil {
+		return errors.Wrap(err, "failed to create dynamo table resources")
+	}
+
+	if err = autoScale(ctx, locals, awsProvider, createdDynamodbTable); err != nil {
+		return errors.Wrap(err, "failed to create dynamo db auto scaling resources")
+	}
 	return nil
 }

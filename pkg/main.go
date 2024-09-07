@@ -3,7 +3,7 @@ package pkg
 import (
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/planton-cloud-apis/zzgo/cloud/planton/apis/code2cloud/v1/aws/awsdynamodb"
-	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/provider/aws/pulumiawsprovider"
+	"github.com/pulumi/pulumi-aws-native/sdk/go/aws"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -14,8 +14,16 @@ type ResourceStack struct {
 
 func (s *ResourceStack) Resources(ctx *pulumi.Context) error {
 	locals := initializeLocals(ctx, s.StackInput)
+
 	//create aws provider using the credentials from the input
-	awsProvider, err := pulumiawsprovider.GetNative(ctx, s.StackInput.AwsCredential)
+	awsProvider, err := aws.NewProvider(ctx,
+		"aws-provider",
+		&aws.ProviderArgs{
+			AccessKey:                 pulumi.String(s.StackInput.AwsCredential.Spec.AccessKeyId),
+			SecretKey:                 pulumi.String(s.StackInput.AwsCredential.Spec.SecretAccessKey),
+			Region:                    pulumi.String(s.StackInput.AwsCredential.Spec.Region),
+			SkipCredentialsValidation: pulumi.Bool(true),
+		})
 	if err != nil {
 		return errors.Wrap(err, "failed to create aws provider")
 	}

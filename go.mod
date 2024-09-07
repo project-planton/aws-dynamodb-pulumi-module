@@ -13,9 +13,7 @@ toolchain go1.23.0
 require (
 	github.com/pkg/errors v0.9.1
 	github.com/plantoncloud/planton-cloud-apis v0.1.51
-	github.com/plantoncloud/pulumi-module-golang-commons v0.0.0-20240905105923-c9458da08f51
 	github.com/plantoncloud/stack-job-runner-golang-sdk v0.0.59
-	github.com/pulumi/pulumi-aws-native/sdk v0.121.0
 	github.com/pulumi/pulumi-aws/sdk/v6 v6.42.1
 	github.com/pulumi/pulumi/sdk/v3 v3.129.0
 )
@@ -83,6 +81,7 @@ require (
 	github.com/skeema/knownhosts v1.2.2 // indirect
 	github.com/spf13/cobra v1.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/texttheater/golang-levenshtein v1.0.1 // indirect
 	github.com/tweekmonster/luser v0.0.0-20161003172636-3fa38070dbd7 // indirect
 	github.com/uber/jaeger-client-go v2.30.0+incompatible // indirect
@@ -106,4 +105,5 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/frand v1.4.2 // indirect
+	pgregory.net/rapid v0.6.1 // indirect
 )

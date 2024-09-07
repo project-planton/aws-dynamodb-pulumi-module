@@ -3,8 +3,8 @@ package pkg
 import (
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/aws-dynamodb-pulumi-module/pkg/outputs"
-	"github.com/pulumi/pulumi-aws-native/sdk/go/aws"
-	"github.com/pulumi/pulumi-aws-native/sdk/go/aws/dynamodb"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/dynamodb"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 

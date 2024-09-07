@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/aws-dynamodb-pulumi-module/pkg/outputs"
-	"github.com/pulumi/pulumi-aws-native/sdk/go/aws"
+	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/appautoscaling"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/dynamodb"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func autoScale(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider, createdDynamodbTable *dynamodb.Table) error {
+func autoScale(ctx *pulumi.Context, locals *Locals,
+	awsProvider *aws.Provider, createdDynamodbTable *dynamodb.Table) error {
 	awsDynamodb := locals.AwsDynamodb
 	enableAutoScale := false
 	if awsDynamodb.Spec.Table.AutoScale != nil {

@@ -25,6 +25,9 @@ func (s *ResourceStack) Resources(ctx *pulumi.Context) error {
 			SecretKey: pulumi.String(awsCredential.Spec.SecretAccessKey),
 			Region:    pulumi.String(awsCredential.Spec.Region),
 		})
+	if err != nil {
+		return errors.Wrap(err, "failed to create aws provider")
+	}
 
 	createdDynamodbTable, err := table(ctx, locals, awsProvider)
 	if err != nil {

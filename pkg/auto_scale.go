@@ -52,10 +52,10 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	autoScaleIndexReadTarget := 50.0
 
 	if awsDynamodb.Spec.Table.AutoScale != nil &&
-		awsDynamodb.Spec.Table.AutoScale.IndexReadCapacity != nil {
-		autoScaleMinIndexReadCapacity = int(awsDynamodb.Spec.Table.AutoScale.IndexReadCapacity.MinCapacity)
-		autoScaleMaxIndexReadCapacity = int(awsDynamodb.Spec.Table.AutoScale.IndexReadCapacity.MaxCapacity)
-		autoScaleIndexReadTarget = awsDynamodb.Spec.Table.AutoScale.IndexReadCapacity.TargetUtilization
+		awsDynamodb.Spec.Table.AutoScale.ReadCapacity != nil {
+		autoScaleMinIndexReadCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MinCapacity)
+		autoScaleMaxIndexReadCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MaxCapacity)
+		autoScaleIndexReadTarget = awsDynamodb.Spec.Table.AutoScale.ReadCapacity.TargetUtilization
 	}
 
 	//index write capacity
@@ -64,17 +64,10 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	autoScaleIndexWriteTarget := 50.0
 
 	if awsDynamodb.Spec.Table.AutoScale != nil &&
-		awsDynamodb.Spec.Table.AutoScale.IndexWriteCapacity != nil {
-		autoScaleMinIndexWriteCapacity = int(awsDynamodb.Spec.Table.AutoScale.IndexWriteCapacity.MinCapacity)
-		autoScaleMaxIndexWriteCapacity = int(awsDynamodb.Spec.Table.AutoScale.IndexWriteCapacity.MaxCapacity)
-		autoScaleIndexWriteTarget = awsDynamodb.Spec.Table.AutoScale.IndexWriteCapacity.TargetUtilization
-	}
-
-	autoScaleScaleInCoolDown := 0
-	autoScaleScaleOutCoolDown := 0
-	if awsDynamodb.Spec.Table.AutoScale != nil {
-		autoScaleScaleInCoolDown = int(awsDynamodb.Spec.Table.AutoScale.ScaleInCoolDown)
-		autoScaleScaleOutCoolDown = int(awsDynamodb.Spec.Table.AutoScale.ScaleOutCoolDown)
+		awsDynamodb.Spec.Table.AutoScale.WriteCapacity != nil {
+		autoScaleMinIndexWriteCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MinCapacity)
+		autoScaleMaxIndexWriteCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MaxCapacity)
+		autoScaleIndexWriteTarget = awsDynamodb.Spec.Table.AutoScale.WriteCapacity.TargetUtilization
 	}
 
 	readTarget, err := appautoscaling.NewTarget(ctx, "readTarget", &appautoscaling.TargetArgs{
@@ -101,9 +94,7 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 			PredefinedMetricSpecification: &appautoscaling.PolicyTargetTrackingScalingPolicyConfigurationPredefinedMetricSpecificationArgs{
 				PredefinedMetricType: pulumi.String("DynamoDBReadCapacityUtilization"),
 			},
-			TargetValue:      pulumi.Float64(autoScaleReadTarget),
-			ScaleInCooldown:  pulumi.Int(autoScaleScaleInCoolDown),
-			ScaleOutCooldown: pulumi.Int(autoScaleScaleOutCoolDown),
+			TargetValue: pulumi.Float64(autoScaleReadTarget),
 		},
 	}, pulumi.Provider(awsProvider),
 		pulumi.Parent(readTarget),
@@ -140,9 +131,7 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 				PredefinedMetricSpecification: &appautoscaling.PolicyTargetTrackingScalingPolicyConfigurationPredefinedMetricSpecificationArgs{
 					PredefinedMetricType: pulumi.String("DynamoDBReadCapacityUtilization"),
 				},
-				TargetValue:      pulumi.Float64(autoScaleIndexReadTarget),
-				ScaleInCooldown:  pulumi.Int(autoScaleScaleInCoolDown),
-				ScaleOutCooldown: pulumi.Int(autoScaleScaleOutCoolDown),
+				TargetValue: pulumi.Float64(autoScaleIndexReadTarget),
 			},
 		}, pulumi.Provider(awsProvider),
 			pulumi.Parent(indexTarget),
@@ -179,9 +168,7 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 			PredefinedMetricSpecification: &appautoscaling.PolicyTargetTrackingScalingPolicyConfigurationPredefinedMetricSpecificationArgs{
 				PredefinedMetricType: pulumi.String("DynamoDBWriteCapacityUtilization"),
 			},
-			TargetValue:      pulumi.Float64(autoScaleWriteTarget),
-			ScaleInCooldown:  pulumi.Int(autoScaleScaleInCoolDown),
-			ScaleOutCooldown: pulumi.Int(autoScaleScaleOutCoolDown),
+			TargetValue: pulumi.Float64(autoScaleWriteTarget),
 		},
 	}, pulumi.Provider(awsProvider),
 		pulumi.Parent(writeTarget),
@@ -218,9 +205,7 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 				PredefinedMetricSpecification: &appautoscaling.PolicyTargetTrackingScalingPolicyConfigurationPredefinedMetricSpecificationArgs{
 					PredefinedMetricType: pulumi.String("DynamoDBWriteCapacityUtilization"),
 				},
-				TargetValue:      pulumi.Float64(autoScaleIndexWriteTarget),
-				ScaleInCooldown:  pulumi.Int(autoScaleScaleInCoolDown),
-				ScaleOutCooldown: pulumi.Int(autoScaleScaleOutCoolDown),
+				TargetValue: pulumi.Float64(autoScaleIndexWriteTarget),
 			},
 		}, pulumi.Provider(awsProvider),
 			pulumi.Parent(indexTarget),

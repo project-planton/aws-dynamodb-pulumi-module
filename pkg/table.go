@@ -10,6 +10,8 @@ import (
 
 func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dynamodb.Table, error) {
 	awsDynamodb := locals.AwsDynamodb
+
+	// stream
 	streamEnabled := awsDynamodb.Spec.Table.EnableStreams
 	streamViewType := ""
 	if len(awsDynamodb.Spec.Table.ReplicaRegionNames) > 0 {
@@ -20,6 +22,21 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 		streamViewType = awsDynamodb.Spec.Table.StreamViewType
 	}
 
+	// capacity
+	readCapacity := 0
+	writeCapacity := 0
+	if awsDynamodb.Spec.Table.AutoScale != nil {
+		readCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MinCapacity)
+		writeCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MinCapacity)
+	}
+
+	// range key
+	rangeKey := ""
+	if awsDynamodb.Spec.Table.RangeKey != nil {
+		rangeKey = awsDynamodb.Spec.Table.RangeKey.Name
+	}
+
+	// replicas
 	var replicaArray = dynamodb.TableReplicaTypeArray{}
 	for _, regionName := range awsDynamodb.Spec.Table.ReplicaRegionNames {
 		replicaArray = append(replicaArray, &dynamodb.TableReplicaTypeArgs{
@@ -30,14 +47,36 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 		})
 	}
 
+	// attributes
 	var attributeArray = dynamodb.TableAttributeArray{}
-	for _, attribute := range awsDynamodb.Spec.Table.Attributes {
+	var attributeMap = make(map[string]bool)
+
+	attributeMap[awsDynamodb.Spec.Table.HashKey.Name] = true
+	attributeArray = append(attributeArray, &dynamodb.TableAttributeArgs{
+		Name: pulumi.String(awsDynamodb.Spec.Table.HashKey.Name),
+		Type: pulumi.String(awsDynamodb.Spec.Table.HashKey.Type),
+	})
+
+	if awsDynamodb.Spec.Table.RangeKey.Name != "" {
+		attributeMap[awsDynamodb.Spec.Table.RangeKey.Name] = true
 		attributeArray = append(attributeArray, &dynamodb.TableAttributeArgs{
-			Name: pulumi.String(attribute.Name),
-			Type: pulumi.String(attribute.Type),
+			Name: pulumi.String(awsDynamodb.Spec.Table.RangeKey.Name),
+			Type: pulumi.String(awsDynamodb.Spec.Table.RangeKey.Type),
 		})
 	}
 
+	for _, attribute := range awsDynamodb.Spec.Table.Attributes {
+		_, exists := attributeMap[attribute.Name]
+		if !exists {
+			attributeMap[attribute.Name] = true
+			attributeArray = append(attributeArray, &dynamodb.TableAttributeArgs{
+				Name: pulumi.String(attribute.Name),
+				Type: pulumi.String(attribute.Type),
+			})
+		}
+	}
+
+	// global secondary index
 	var globalSecondaryIndexArray = dynamodb.TableGlobalSecondaryIndexArray{}
 	for _, globalSecondaryIndex := range awsDynamodb.Spec.Table.GlobalSecondaryIndexes {
 		globalSecondaryIndexArray = append(globalSecondaryIndexArray, &dynamodb.TableGlobalSecondaryIndexArgs{
@@ -51,6 +90,7 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 		})
 	}
 
+	// local secondary index
 	var localSecondaryIndexArray = dynamodb.TableLocalSecondaryIndexArray{}
 	for _, localSecondaryIndex := range awsDynamodb.Spec.Table.LocalSecondaryIndexes {
 		localSecondaryIndexArray = append(localSecondaryIndexArray, &dynamodb.TableLocalSecondaryIndexArgs{
@@ -61,6 +101,7 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 		})
 	}
 
+	// server side encryption
 	var serverSideEncryption *dynamodb.TableServerSideEncryptionArgs
 	if awsDynamodb.Spec.Table.ServerSideEncryption != nil {
 		serverSideEncryption = &dynamodb.TableServerSideEncryptionArgs{
@@ -69,6 +110,7 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 		}
 	}
 
+	// point in time recovery
 	var pointInTimeRecovery *dynamodb.TablePointInTimeRecoveryArgs
 	if awsDynamodb.Spec.Table.PointInTimeRecovery != nil {
 		pointInTimeRecovery = &dynamodb.TablePointInTimeRecoveryArgs{
@@ -76,6 +118,7 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 		}
 	}
 
+	// ttl
 	var ttl *dynamodb.TableTtlArgs
 	if awsDynamodb.Spec.Table.Ttl != nil {
 		ttl = &dynamodb.TableTtlArgs{
@@ -84,6 +127,7 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 		}
 	}
 
+	// import table
 	var importTable *dynamodb.TableImportTableArgs
 	if awsDynamodb.Spec.Table.ImportTable != nil {
 		inputFormatOptions := &dynamodb.TableImportTableInputFormatOptionsArgs{
@@ -118,16 +162,16 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 	}
 
 	createdDynamodbTable, err := dynamodb.NewTable(ctx, awsDynamodb.Metadata.Name, &dynamodb.TableArgs{
-		Name:                      pulumi.String(awsDynamodb.Metadata.Name),
+		Name:                      pulumi.String(awsDynamodb.Spec.Table.TableName),
 		BillingMode:               pulumi.String(awsDynamodb.Spec.Table.BillingMode),
-		ReadCapacity:              pulumi.Int(awsDynamodb.Spec.Table.ReadCapacity),
-		WriteCapacity:             pulumi.Int(awsDynamodb.Spec.Table.WriteCapacity),
-		HashKey:                   pulumi.String(awsDynamodb.Spec.Table.HashKey),
-		RangeKey:                  pulumi.String(awsDynamodb.Spec.Table.RangeKey),
+		ReadCapacity:              pulumi.Int(readCapacity),
+		WriteCapacity:             pulumi.Int(writeCapacity),
+		HashKey:                   pulumi.String(awsDynamodb.Spec.Table.HashKey.Name),
+		RangeKey:                  pulumi.String(rangeKey),
 		StreamEnabled:             pulumi.Bool(streamEnabled),
 		StreamViewType:            pulumi.String(streamViewType),
-		TableClass:                pulumi.String(awsDynamodb.Spec.Table.TableClass),
-		DeletionProtectionEnabled: pulumi.Bool(awsDynamodb.Spec.Table.DeletionProtectionEnabled),
+		TableClass:                pulumi.String("STANDARD"),
+		DeletionProtectionEnabled: pulumi.Bool(false),
 		ServerSideEncryption:      serverSideEncryption,
 		PointInTimeRecovery:       pointInTimeRecovery,
 		Ttl:                       ttl,

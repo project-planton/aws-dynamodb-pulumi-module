@@ -25,9 +25,17 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 	// capacity
 	readCapacity := 0
 	writeCapacity := 0
-	if awsDynamodb.Spec.Table.AutoScale != nil {
-		readCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MinCapacity)
-		writeCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MinCapacity)
+	if awsDynamodb.Spec.Table.BillingMode == "PROVISIONED" {
+		readCapacity = 5
+		writeCapacity = 5
+		if awsDynamodb.Spec.Table.AutoScale != nil &&
+			awsDynamodb.Spec.Table.AutoScale.ReadCapacity != nil {
+			readCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MinCapacity)
+		}
+		if awsDynamodb.Spec.Table.AutoScale != nil &&
+			awsDynamodb.Spec.Table.AutoScale.WriteCapacity != nil {
+			writeCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MinCapacity)
+		}
 	}
 
 	// range key

@@ -87,12 +87,20 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 	// global secondary index
 	var globalSecondaryIndexArray = dynamodb.TableGlobalSecondaryIndexArray{}
 	for _, globalSecondaryIndex := range awsDynamodb.Spec.Table.GlobalSecondaryIndexes {
+		globalIndexReadCapacity := globalSecondaryIndex.ReadCapacity
+		globalIndexWriteCapacity := globalSecondaryIndex.WriteCapacity
+		if awsDynamodb.Spec.Table.BillingMode == "PROVISIONED" && globalIndexReadCapacity == 0 {
+			globalIndexReadCapacity = int32(readCapacity)
+		}
+		if awsDynamodb.Spec.Table.BillingMode == "PROVISIONED" && globalIndexWriteCapacity == 0 {
+			globalIndexWriteCapacity = int32(writeCapacity)
+		}
 		globalSecondaryIndexArray = append(globalSecondaryIndexArray, &dynamodb.TableGlobalSecondaryIndexArgs{
 			Name:             pulumi.String(globalSecondaryIndex.Name),
 			HashKey:          pulumi.String(globalSecondaryIndex.HashKey),
 			RangeKey:         pulumi.String(globalSecondaryIndex.RangeKey),
-			ReadCapacity:     pulumi.Int(globalSecondaryIndex.ReadCapacity),
-			WriteCapacity:    pulumi.Int(globalSecondaryIndex.WriteCapacity),
+			ReadCapacity:     pulumi.Int(globalIndexReadCapacity),
+			WriteCapacity:    pulumi.Int(globalIndexWriteCapacity),
 			ProjectionType:   pulumi.String(globalSecondaryIndex.ProjectionType),
 			NonKeyAttributes: pulumi.ToStringArray(globalSecondaryIndex.NonKeyAttributes),
 		})
@@ -148,7 +156,7 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 			inputFormatOptions = &dynamodb.TableImportTableInputFormatOptionsArgs{
 				Csv: dynamodb.TableImportTableInputFormatOptionsCsvArgs{
 					Delimiter:   pulumi.String(awsDynamodb.Spec.Table.ImportTable.InputFormatOptions.Csv.Delimiter),
-					HeaderLists: pulumi.ToStringArray(awsDynamodb.Spec.Table.ImportTable.InputFormatOptions.Csv.HeaderLists),
+					HeaderLists: pulumi.ToStringArray(awsDynamodb.Spec.Table.ImportTable.InputFormatOptions.Csv.Headers),
 				},
 			}
 		}

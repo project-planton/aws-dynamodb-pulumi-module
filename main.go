@@ -16,6 +16,12 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
+		globalSecondaryIndexes := make([]*awsdynamodb.AwsDynamodbTableGlobalSecondaryIndex, 0)
+		globalSecondaryIndexes = append(globalSecondaryIndexes, &awsdynamodb.AwsDynamodbTableGlobalSecondaryIndex{
+			Name:           "RangeKey-Index",
+			ProjectionType: "ALL",
+			HashKey:        "RangeKey",
+		})
 		s := pkg.ResourceStack{
 			StackInput: &awsdynamodb.AwsDynamodbStackInput{
 				ApiResource: &awsdynamodb.AwsDynamodb{
@@ -35,7 +41,7 @@ func main() {
 						},
 						Table: &awsdynamodb.AwsDynamodbTable{
 							TableName:   "orders",
-							BillingMode: "PAY_PER_REQUEST",
+							BillingMode: "PROVISIONED",
 							HashKey: &awsdynamodb.AwsDynamodbTableAttribute{
 								Name: "HashKey",
 								Type: "S",
@@ -44,6 +50,7 @@ func main() {
 								Name: "RangeKey",
 								Type: "N",
 							},
+							GlobalSecondaryIndexes: globalSecondaryIndexes,
 							AutoScale: &awsdynamodb.AwsDynamodbAutoScaleCapacity{
 								IsEnabled: true,
 							},

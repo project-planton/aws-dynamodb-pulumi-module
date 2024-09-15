@@ -14,7 +14,7 @@ func initializeLocals(ctx *pulumi.Context, stackInput *awsdynamodb.AwsDynamodbSt
 	locals := &Locals{}
 
 	//assign value for the locals variable to make it available across the project
-	locals.AwsDynamodb = stackInput.ApiResource
+	locals.AwsDynamodb = stackInput.Target
 
 	return locals
 }

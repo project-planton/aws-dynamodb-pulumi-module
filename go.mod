@@ -8,8 +8,8 @@ go 1.23.0
 
 require (
 	github.com/pkg/errors v0.9.1
-	github.com/plantoncloud/planton/apis v0.0.0-20240921103259-23d140662c70
-	github.com/plantoncloud/pulumi-module-golang-commons v0.0.0-20240921104305-ab6ac11ed893
+	github.com/plantoncloud/planton/apis v0.0.0-20240921104154-6949599116e2
+	github.com/plantoncloud/pulumi-module-golang-commons v0.0.0-20240921115810-6eab7ba7d70e
 	github.com/pulumi/pulumi-aws/sdk/v6 v6.42.1
 	github.com/pulumi/pulumi/sdk/v3 v3.129.0
 )

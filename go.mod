@@ -1,8 +1,6 @@
 module github.com/plantoncloud/aws-dynamodb-pulumi-module
 
-go 1.23.0
-
-//replace github.com/plantoncloud/project-planton => ../../plantoncloud/project-planton
+go 1.23.1
 
 //replace github.com/plantoncloud/pulumi-module-golang-commons => ../../plantoncloud/pulumi-module-golang-commons
 

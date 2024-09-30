@@ -1,13 +1,13 @@
 package pkg
 
 import (
+	awsdynamodbv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/apis/provider/aws/awsdynamodb/v1"
 	"github.com/pkg/errors"
-	"github.com/plantoncloud/project-planton/apis/zzgo/cloud/planton/apis/code2cloud/v1/aws/awsdynamodb"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func Resources(ctx *pulumi.Context, stackInput *awsdynamodb.AwsDynamodbStackInput) error {
+func Resources(ctx *pulumi.Context, stackInput *awsdynamodbv1.AwsDynamodbStackInput) error {
 	locals := initializeLocals(ctx, stackInput)
 
 	awsCredential := stackInput.AwsCredential

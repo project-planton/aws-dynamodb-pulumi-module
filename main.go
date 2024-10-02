@@ -1,7 +1,7 @@
 package main
 
 import (
-	awsdynamodbv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/apis/provider/aws/awsdynamodb/v1"
+	awsdynamodbv1 "buf.build/gen/go/plantoncloud/project-planton/protocolbuffers/go/project/planton/provider/aws/awsdynamodb/v1"
 	"github.com/pkg/errors"
 	"github.com/plantoncloud/aws-dynamodb-pulumi-module/pkg"
 	"github.com/plantoncloud/pulumi-module-golang-commons/pkg/stackinput"

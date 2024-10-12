@@ -3,7 +3,7 @@ package pkg
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/plantoncloud/aws-dynamodb-pulumi-module/pkg/outputs"
+	"github.com/project-planton/aws-dynamodb-pulumi-module/pkg/outputs"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/appautoscaling"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/dynamodb"

@@ -13,23 +13,33 @@ func Resources(ctx *pulumi.Context, stackInput *awsdynamodbv1.AwsDynamodbStackIn
 	awsCredential := stackInput.AwsCredential
 
 	//create aws provider using the credentials from the input
-	awsProvider, err := aws.NewProvider(ctx,
+	provider, err := aws.NewProvider(ctx,
 		"classic-provider",
-		&aws.ProviderArgs{
-			AccessKey: pulumi.String(awsCredential.AccessKeyId),
-			SecretKey: pulumi.String(awsCredential.SecretAccessKey),
-			Region:    pulumi.String(awsCredential.Region),
-		})
+		&aws.ProviderArgs{})
 	if err != nil {
-		return errors.Wrap(err, "failed to create aws provider")
+		return errors.Wrap(err, "failed to create aws native provider")
 	}
 
-	createdDynamodbTable, err := table(ctx, locals, awsProvider)
+	if awsCredential != nil {
+		//create aws provider using the credentials from the input
+		provider, err = aws.NewProvider(ctx,
+			"classic-provider",
+			&aws.ProviderArgs{
+				AccessKey: pulumi.String(awsCredential.AccessKeyId),
+				SecretKey: pulumi.String(awsCredential.SecretAccessKey),
+				Region:    pulumi.String(awsCredential.Region),
+			})
+		if err != nil {
+			return errors.Wrap(err, "failed to create aws native provider")
+		}
+	}
+
+	createdDynamodbTable, err := table(ctx, locals, provider)
 	if err != nil {
 		return errors.Wrap(err, "failed to create dynamo table resources")
 	}
 
-	if err = autoScale(ctx, locals, awsProvider, createdDynamodbTable); err != nil {
+	if err = autoScale(ctx, locals, provider, createdDynamodbTable); err != nil {
 		return errors.Wrap(err, "failed to create dynamo db auto scaling resources")
 	}
 	return nil

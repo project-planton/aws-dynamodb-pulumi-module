@@ -2,5 +2,5 @@
 name: planton-cloud-aws-module-test
 runtime:
   name: go
-  options:
-    binary: ./debug.sh
+#  options:
+#    binary: ./debug.sh

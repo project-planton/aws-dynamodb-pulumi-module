@@ -65,7 +65,7 @@ func table(ctx *pulumi.Context, locals *Locals, awsProvider *aws.Provider) (*dyn
 		Type: pulumi.String(awsDynamodb.Spec.Table.HashKey.Type),
 	})
 
-	if awsDynamodb.Spec.Table.RangeKey.Name != "" {
+	if awsDynamodb.Spec.Table.RangeKey != nil && awsDynamodb.Spec.Table.RangeKey.Name != "" {
 		attributeMap[awsDynamodb.Spec.Table.RangeKey.Name] = true
 		attributeArray = append(attributeArray, &dynamodb.TableAttributeArgs{
 			Name: pulumi.String(awsDynamodb.Spec.Table.RangeKey.Name),

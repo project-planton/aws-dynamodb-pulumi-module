@@ -14,11 +14,11 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	awsProvider *aws.Provider, createdDynamodbTable *dynamodb.Table) error {
 	awsDynamodb := locals.AwsDynamodb
 	enableAutoScale := false
-	if awsDynamodb.Spec.Table.AutoScale != nil {
-		enableAutoScale = awsDynamodb.Spec.Table.AutoScale.IsEnabled
+	if awsDynamodb.Spec.AutoScale != nil {
+		enableAutoScale = awsDynamodb.Spec.AutoScale.IsEnabled
 	}
 
-	if !enableAutoScale || awsDynamodb.Spec.Table.BillingMode != "PROVISIONED" {
+	if !enableAutoScale || awsDynamodb.Spec.BillingMode != "PROVISIONED" {
 		return nil
 	}
 
@@ -27,11 +27,11 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	autoScaleMaxReadCapacity := 20
 	autoScaleReadTarget := 50.0
 
-	if awsDynamodb.Spec.Table.AutoScale != nil &&
-		awsDynamodb.Spec.Table.AutoScale.ReadCapacity != nil {
-		autoScaleMinReadCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MinCapacity)
-		autoScaleMaxReadCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MaxCapacity)
-		autoScaleReadTarget = awsDynamodb.Spec.Table.AutoScale.ReadCapacity.TargetUtilization
+	if awsDynamodb.Spec.AutoScale != nil &&
+		awsDynamodb.Spec.AutoScale.ReadCapacity != nil {
+		autoScaleMinReadCapacity = int(awsDynamodb.Spec.AutoScale.ReadCapacity.MinCapacity)
+		autoScaleMaxReadCapacity = int(awsDynamodb.Spec.AutoScale.ReadCapacity.MaxCapacity)
+		autoScaleReadTarget = awsDynamodb.Spec.AutoScale.ReadCapacity.TargetUtilization
 	}
 
 	//write capacity
@@ -39,11 +39,11 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	autoScaleMaxWriteCapacity := 20
 	autoScaleWriteTarget := 50.0
 
-	if awsDynamodb.Spec.Table.AutoScale != nil &&
-		awsDynamodb.Spec.Table.AutoScale.WriteCapacity != nil {
-		autoScaleMinWriteCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MinCapacity)
-		autoScaleMaxWriteCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MaxCapacity)
-		autoScaleWriteTarget = awsDynamodb.Spec.Table.AutoScale.WriteCapacity.TargetUtilization
+	if awsDynamodb.Spec.AutoScale != nil &&
+		awsDynamodb.Spec.AutoScale.WriteCapacity != nil {
+		autoScaleMinWriteCapacity = int(awsDynamodb.Spec.AutoScale.WriteCapacity.MinCapacity)
+		autoScaleMaxWriteCapacity = int(awsDynamodb.Spec.AutoScale.WriteCapacity.MaxCapacity)
+		autoScaleWriteTarget = awsDynamodb.Spec.AutoScale.WriteCapacity.TargetUtilization
 	}
 
 	//index read capacity
@@ -51,11 +51,11 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	autoScaleMaxIndexReadCapacity := 20
 	autoScaleIndexReadTarget := 50.0
 
-	if awsDynamodb.Spec.Table.AutoScale != nil &&
-		awsDynamodb.Spec.Table.AutoScale.ReadCapacity != nil {
-		autoScaleMinIndexReadCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MinCapacity)
-		autoScaleMaxIndexReadCapacity = int(awsDynamodb.Spec.Table.AutoScale.ReadCapacity.MaxCapacity)
-		autoScaleIndexReadTarget = awsDynamodb.Spec.Table.AutoScale.ReadCapacity.TargetUtilization
+	if awsDynamodb.Spec.AutoScale != nil &&
+		awsDynamodb.Spec.AutoScale.ReadCapacity != nil {
+		autoScaleMinIndexReadCapacity = int(awsDynamodb.Spec.AutoScale.ReadCapacity.MinCapacity)
+		autoScaleMaxIndexReadCapacity = int(awsDynamodb.Spec.AutoScale.ReadCapacity.MaxCapacity)
+		autoScaleIndexReadTarget = awsDynamodb.Spec.AutoScale.ReadCapacity.TargetUtilization
 	}
 
 	//index write capacity
@@ -63,11 +63,11 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	autoScaleMaxIndexWriteCapacity := 20
 	autoScaleIndexWriteTarget := 50.0
 
-	if awsDynamodb.Spec.Table.AutoScale != nil &&
-		awsDynamodb.Spec.Table.AutoScale.WriteCapacity != nil {
-		autoScaleMinIndexWriteCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MinCapacity)
-		autoScaleMaxIndexWriteCapacity = int(awsDynamodb.Spec.Table.AutoScale.WriteCapacity.MaxCapacity)
-		autoScaleIndexWriteTarget = awsDynamodb.Spec.Table.AutoScale.WriteCapacity.TargetUtilization
+	if awsDynamodb.Spec.AutoScale != nil &&
+		awsDynamodb.Spec.AutoScale.WriteCapacity != nil {
+		autoScaleMinIndexWriteCapacity = int(awsDynamodb.Spec.AutoScale.WriteCapacity.MinCapacity)
+		autoScaleMaxIndexWriteCapacity = int(awsDynamodb.Spec.AutoScale.WriteCapacity.MaxCapacity)
+		autoScaleIndexWriteTarget = awsDynamodb.Spec.AutoScale.WriteCapacity.TargetUtilization
 	}
 
 	readTarget, err := appautoscaling.NewTarget(ctx, "readTarget", &appautoscaling.TargetArgs{
@@ -106,7 +106,7 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	ctx.Export(outputs.AutoscalingReadPolicyArn, readPolicy.Arn)
 
 	indexReadPolicyArnList := pulumi.StringArray{}
-	for _, index := range awsDynamodb.Spec.Table.GlobalSecondaryIndexes {
+	for _, index := range awsDynamodb.Spec.GlobalSecondaryIndexes {
 		indexTarget, err := appautoscaling.NewTarget(ctx, fmt.Sprintf("readTargetIndex-%s", index.Name), &appautoscaling.TargetArgs{
 			MaxCapacity:       pulumi.Int(autoScaleMaxIndexReadCapacity),
 			MinCapacity:       pulumi.Int(autoScaleMinIndexReadCapacity),
@@ -180,7 +180,7 @@ func autoScale(ctx *pulumi.Context, locals *Locals,
 	ctx.Export(outputs.AutoscalingWritePolicyArn, writePolicy.Arn)
 
 	indexWritePolicyArnList := pulumi.StringArray{}
-	for _, index := range awsDynamodb.Spec.Table.GlobalSecondaryIndexes {
+	for _, index := range awsDynamodb.Spec.GlobalSecondaryIndexes {
 		indexTarget, err := appautoscaling.NewTarget(ctx, fmt.Sprintf("writeTargetIndex-%s", index.Name), &appautoscaling.TargetArgs{
 			MaxCapacity:       pulumi.Int(autoScaleMaxIndexWriteCapacity),
 			MinCapacity:       pulumi.Int(autoScaleMinIndexWriteCapacity),
